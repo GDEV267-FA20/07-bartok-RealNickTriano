@@ -346,7 +346,7 @@ public class Bartok : MonoBehaviour
 
         CURRENT_PLAYER = null;
 
-        SceneManager.LoadScene("__Bartok_Scene_0");
+        SceneManager.LoadScene("_Bartok_Scene_0");
 
     }
 
