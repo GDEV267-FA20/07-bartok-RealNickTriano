@@ -3,10 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// This enum contains the different phases of a game turn
+
+public enum TurnPhase
+{
+
+    idle,
+
+    pre,
+
+    waiting,
+
+    post,
+
+    gameOver
+
+}
 public class Bartok : MonoBehaviour
 {
     static public Bartok S;
 
+    static public Player CURRENT_PLAYER;                   // a
 
 
     [Header("Set in Inspector")]
@@ -36,6 +53,8 @@ public class Bartok : MonoBehaviour
 
 
     public CardBartok targetCard;
+
+    public TurnPhase phase = TurnPhase.idle;
 
     private BartokLayout layout;
 
@@ -192,6 +211,104 @@ public class Bartok : MonoBehaviour
 
         CardBartok tCB = MoveToTarget(Draw());
 
+        // Set the CardBartok to call CBCallback on this Bartok when it is done
+
+        tCB.reportFinishTo = this.gameObject;                                // b
+
+    
+
+    }
+
+    // This callback is used by the last card to be dealt at the beginning
+
+    public void CBCallback(CardBartok cb)
+    {                                  // c
+
+        // You sometimes want to have reporting of method calls like this 
+
+        Utils.tr("Bartok:CBCallback()", cb.name);                             // d
+
+        StartGame(); // Start the Game
+
+    }
+
+    public void StartGame()
+    {
+
+        // Pick the player to the left of the human to go first.
+
+        PassTurn(1);                                                         // e
+
+    }
+
+
+
+    public void PassTurn(int num = -1)
+    {                                       // f
+
+        // If no number was passed in, pick the next player
+
+        if (num == -1)
+        {
+
+            int ndx = players.IndexOf(CURRENT_PLAYER);
+
+            num = (ndx + 1) % 4;
+
+        }
+
+        int lastPlayerNum = -1;
+
+        if (CURRENT_PLAYER != null)
+        {
+
+            lastPlayerNum = CURRENT_PLAYER.playerNum;
+
+        }
+
+        CURRENT_PLAYER = players[num];
+
+        phase = TurnPhase.pre;
+
+
+
+        //    CURRENT_PLAYER.TakeTurn();                                             // g
+
+
+
+        // Report the turn passing
+
+        Utils.tr("Bartok:PassTurn()", "Old: " + lastPlayerNum,                     // h
+
+                 "New: " + CURRENT_PLAYER.playerNum);
+    }
+
+    // ValidPlay verifies that the card chosen can be played on the discard pile
+
+    public bool ValidPlay(CardBartok cb)
+    {
+
+        // It's a valid play if the rank is the same
+
+        if (cb.rank == targetCard.rank) return (true);
+
+
+
+        // It's a valid play if the suit is the same
+
+        if (cb.suit == targetCard.suit)
+        {
+
+            return (true);
+
+        }
+
+
+
+        // Otherwise, return false
+
+        return (false);
+
     }
 
 
@@ -222,7 +339,16 @@ public class Bartok : MonoBehaviour
 
         tCB.faceUp = true;
 
+        tCB.SetSortingLayerName("10");
 
+        tCB.eventualSortLayer = layout.target.layerName;
+
+        if (targetCard != null)
+        {
+
+            MoveToDiscard(targetCard);
+
+        }
 
         targetCard = tCB;
 
@@ -232,9 +358,28 @@ public class Bartok : MonoBehaviour
 
     }
 
+    public CardBartok MoveToDiscard(CardBartok tCB)
+    {
+
+        tCB.state = CBState.discard;
+
+        discardPile.Add(tCB);
+
+        tCB.SetSortingLayerName(layout.discardPile.layerName);
+
+        tCB.SetSortOrder(discardPile.Count * 4);
+
+        tCB.transform.localPosition = layout.discardPile.pos + Vector3.back / 2;
 
 
-    // This Update() is temporarily used to test adding cards to players' hands
+
+        return (tCB);
+
+    }
+
+
+
+   /* // This Update() is temporarily used to test adding cards to players' hands
 
     void Update()
     {                                                          // d
@@ -269,7 +414,7 @@ public class Bartok : MonoBehaviour
 
     }
 
-
+    */
     List<CardBartok> UpgradeCardsList(List<Card> lCD)
     {                   // a
 

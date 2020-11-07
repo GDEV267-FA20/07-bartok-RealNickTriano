@@ -70,6 +70,11 @@ public class Player
 
         }
 
+        eCB.SetSortingLayerName("10"); // Sorts the moving card to the top   // a
+
+        eCB.eventualSortLayer = handSlotDef.layerName;
+
+
         FanHand();
 
         return (eCB);
@@ -168,11 +173,13 @@ public class Player
 
             hand[i].faceUp = (type == PlayerType.human);                     // i
 
+            // Set the SortOrder of the cards so that they overlap properly
 
+            hand[i].eventualSortOrder = i * 4;                                 // b
 
             // Set the SortOrder of the cards so that they overlap properly
 
-            hand[i].SetSortOrder(i * 4);                                       // j
+           // hand[i].SetSortOrder(i * 4);                                       // j
 
         }
 
