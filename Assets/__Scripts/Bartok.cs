@@ -263,6 +263,12 @@ public class Bartok : MonoBehaviour
         {
 
             lastPlayerNum = CURRENT_PLAYER.playerNum;
+            if (CheckGameOver())
+            {
+
+                return;                                                      // a
+
+            }
 
         }
 
@@ -281,6 +287,67 @@ public class Bartok : MonoBehaviour
         Utils.tr("Bartok:PassTurn()", "Old: " + lastPlayerNum,                     // h
 
                  "New: " + CURRENT_PLAYER.playerNum);
+    }
+
+    public bool CheckGameOver()
+    {
+
+        // See if we need to reshuffle the discard pile into the draw pile
+
+        if (drawPile.Count == 0)
+        {
+
+            List<Card> cards = new List<Card>();
+
+            foreach (CardBartok cb in discardPile)
+            {
+
+                cards.Add(cb);
+
+            }
+
+            discardPile.Clear();
+
+            Deck.Shuffle(ref cards);
+
+            drawPile = UpgradeCardsList(cards);
+
+            ArrangeDrawPile();
+
+        }
+
+
+
+        // Check to see if the current player has won
+
+        if (CURRENT_PLAYER.hand.Count == 0)
+        {
+
+            // The player that just played has won!
+
+            phase = TurnPhase.gameOver;
+
+            Invoke("RestartGame", 1);                                        // b
+
+            return (true);
+
+        }
+
+
+
+        return (false);
+
+    }
+
+
+
+    public void RestartGame()
+    {
+
+        CURRENT_PLAYER = null;
+
+        SceneManager.LoadScene("__Bartok_Scene_0");
+
     }
 
     // ValidPlay verifies that the card chosen can be played on the discard pile
@@ -319,6 +386,53 @@ public class Bartok : MonoBehaviour
     {
 
         CardBartok cd = drawPile[0];     // Pull the 0th CardProspector
+
+        if (drawPile.Count == 0)
+        {       // If the drawPile is now empty
+
+            // We need to shuffle the discards into the drawPile
+
+            int ndx;
+
+            while (discardPile.Count > 0)
+            {
+
+                // Pull a random card from the discard pile
+
+                ndx = Random.Range(0, discardPile.Count);                    // a
+
+                drawPile.Add(discardPile[ndx]);
+
+                discardPile.RemoveAt(ndx);
+
+            }
+
+            ArrangeDrawPile();
+
+            // Show the cards moving to the drawPile
+
+            float t = Time.time;
+
+            foreach (CardBartok tCB in drawPile)
+            {
+
+                tCB.transform.localPosition = layout.discardPile.pos;
+
+                tCB.callbackPlayer = null;
+
+                tCB.MoveTo(layout.drawPile.pos);
+
+                tCB.timeStart = t;
+
+                t += 0.02f;
+
+                tCB.state = CBState.toDrawpile;
+
+                tCB.eventualSortLayer = "0";
+
+            }
+
+        }
 
         drawPile.RemoveAt(0);            // Then remove it from List<> drawPile
 
