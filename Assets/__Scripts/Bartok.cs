@@ -19,6 +19,10 @@ public class Bartok : MonoBehaviour
 
     public float handFanDegrees = 10f;
 
+    public int numStartingCards = 7;
+
+    public float drawTimeStagger = 0.1f;
+
 
     [Header("Set Dynamically")]
 
@@ -151,6 +155,43 @@ public class Bartok : MonoBehaviour
 
         players[0].type = PlayerType.human; // Make only the 0th player human
 
+        CardBartok tCB;
+
+        // Deal seven cards to each player
+
+        for (int i = 0; i < numStartingCards; i++)
+        {
+
+            for (int j = 0; j < 4; j++)
+            {                                        // a
+
+                tCB = Draw(); // Draw a card
+
+                // Stagger the draw time a bit.
+
+                tCB.timeStart = Time.time + drawTimeStagger * (i * 4 + j);   // b
+
+
+
+                players[(j + 1) % 4].AddCard(tCB); // c
+
+            }
+
+        }
+
+
+
+        Invoke("DrawFirstTarget", drawTimeStagger * (numStartingCards * 4 + 4));// d
+
+    }
+
+    public void DrawFirstTarget()
+    {
+
+        // Flip up the first target card from the drawPile
+
+        CardBartok tCB = MoveToTarget(Draw());
+
     }
 
 
@@ -165,6 +206,29 @@ public class Bartok : MonoBehaviour
         drawPile.RemoveAt(0);            // Then remove it from List<> drawPile
 
         return (cd);                      // And return it
+
+    }
+
+    // This makes a new card the target
+
+    public CardBartok MoveToTarget(CardBartok tCB)
+    {
+
+        tCB.timeStart = 0;
+
+        tCB.MoveTo(layout.discardPile.pos + Vector3.back);
+
+        tCB.state = CBState.toTarget;
+
+        tCB.faceUp = true;
+
+
+
+        targetCard = tCB;
+
+
+
+        return (tCB);
 
     }
 
