@@ -72,6 +72,10 @@ public class CardBartok : Card
 
     public GameObject reportFinishTo = null;
 
+    [System.NonSerialized]                                                   // a
+
+    public Player callbackPlayer = null;
+
 
 
     // MoveTo tells the card to interpolate to a new position and rotation
@@ -131,7 +135,7 @@ public class CardBartok : Card
     {
 
         switch (state)
-        {                                                   
+        {
 
             case CBState.toHand:
 
@@ -141,14 +145,14 @@ public class CardBartok : Card
 
             case CBState.to:
 
-                float u = (Time.time - timeStart) / timeDuration;           
+                float u = (Time.time - timeStart) / timeDuration;
 
                 float uC = Easing.Ease(u, MOVE_EASING);
 
 
 
                 if (u < 0)
-                {                                                
+                {
 
                     transform.localPosition = bezierPts[0];
 
@@ -158,7 +162,7 @@ public class CardBartok : Card
 
                 }
                 else if (u >= 1)
-                {                                          
+                {
 
                     uC = 1;
 
@@ -191,12 +195,25 @@ public class CardBartok : Card
 
 
                     if (reportFinishTo != null)
-                    {                               
+                    {
 
                         reportFinishTo.SendMessage("CBCallback", this);
 
                         reportFinishTo = null;
 
+
+                    }
+                    else if (callbackPlayer != null)
+                    {                     // c
+
+                        // If there's a callback Player
+
+                        // Call CBCallback directly on the Player
+
+
+                        callbackPlayer.CBCallback(this);
+
+                        callbackPlayer = null;
                     }
                     else
                     { // If there is nothing to callback
@@ -204,6 +221,8 @@ public class CardBartok : Card
                         // Just let it stay still.
 
                     }
+
+
 
                 }
                 else

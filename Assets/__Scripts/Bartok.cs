@@ -272,7 +272,7 @@ public class Bartok : MonoBehaviour
 
 
 
-        //    CURRENT_PLAYER.TakeTurn();                                             // g
+       CURRENT_PLAYER.TakeTurn();                                             // g
 
 
 
