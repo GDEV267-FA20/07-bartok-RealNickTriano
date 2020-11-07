@@ -144,6 +144,15 @@ public class Player
 
             pos.z = -0.5f * i;                                                 // g
 
+            hand[i].MoveTo(pos, rotQ); // Tell CardBartok to interpolate
+
+            hand[i].state = CBState.toHand;
+
+            // After the move, CardBartok will set the state to CBState.hand
+
+
+
+            /* <= This begins a multiline comment                       // a
 
 
             // Set the localPosition and rotation of the ith card in the hand
@@ -153,6 +162,7 @@ public class Player
             hand[i].transform.rotation = rotQ;
 
             hand[i].state = CBState.hand;
+            This ends the multiline comment => */
 
 
 
